@@ -18,6 +18,7 @@ service Racing {
 // Request for ListRaces call.
 message ListRacesRequest {
   ListRacesRequestFilter filter = 1;
+  repeated ListRacesRequestSort sort = 2;
 }
 
 // Response to ListRaces call.
@@ -29,6 +30,11 @@ message ListRacesResponse {
 message ListRacesRequestFilter {
   repeated int64 meeting_ids = 1;
   bool only_show_visible = 2;
+}
+
+message ListRacesRequestSort {
+  string column = 1;
+  bool is_descending = 2;
 }
 
 /* Resources */

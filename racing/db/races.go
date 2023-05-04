@@ -2,6 +2,9 @@ package db
 
 import (
 	"database/sql"
+	"errors"
+	"fmt"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -17,7 +20,7 @@ type RacesRepo interface {
 	Init() error
 
 	// List will return a list of races.
-	List(filter *racing.ListRacesRequestFilter) ([]*racing.Race, error)
+	List(in *racing.ListRacesRequest) ([]*racing.Race, error)
 }
 
 type racesRepo struct {
@@ -42,7 +45,7 @@ func (r *racesRepo) Init() error {
 	return err
 }
 
-func (r *racesRepo) List(filter *racing.ListRacesRequestFilter) ([]*racing.Race, error) {
+func (r *racesRepo) List(in *racing.ListRacesRequest) ([]*racing.Race, error) {
 	var (
 		err   error
 		query string
@@ -51,8 +54,11 @@ func (r *racesRepo) List(filter *racing.ListRacesRequestFilter) ([]*racing.Race,
 
 	query = getRaceQueries()[racesList]
 
-	query, args = r.applyFilter(query, filter)
-	query = r.applyOrderBy(query)
+	query, args = r.applyFilter(query, in.Filter)
+	query, err = r.applyOrderBy(query, in.Sort)
+	if err != nil {
+		return nil, err
+	}
 
 	rows, err := r.db.Query(query, args...)
 	if err != nil {
@@ -91,10 +97,41 @@ func (r *racesRepo) applyFilter(query string, filter *racing.ListRacesRequestFil
 	return query, args
 }
 
-// Applies the order by advertised_start_time column.
-func (r *racesRepo) applyOrderBy(query string) string {
-	query += " ORDER BY advertised_start_time ASC"
-	return query
+// Applies the order by statement to the query.
+// If not columns are provided in sort, sorting is defaulted to advertised_start_time in ascending order.
+func (r *racesRepo) applyOrderBy(query string, sort []*racing.ListRacesRequestSort) (string, error) {
+	if len(sort) == 0 {
+		defaultSort := racing.ListRacesRequestSort{
+			Column:       "advertised_start_time",
+			IsDescending: false,
+		}
+		sort = append(sort, &defaultSort)
+	}
+
+	var clauses []string
+	isValidColumn := regexp.MustCompile("^[A-Za-z0-9_]+$")
+	for _, sortDetails := range sort {
+		if len(sortDetails.Column) == 0 {
+			err := errors.New("A sort request object is missing the column value.")
+			return query, err
+		}
+
+		// Check column is valid (prevent SQL injection)
+		if !isValidColumn.MatchString(sortDetails.Column) {
+			err := fmt.Errorf("%q is not a valid column name", sortDetails.Column)
+			return query, err
+		}
+
+		// Build order clause
+		orderDirection := "ASC"
+		if sortDetails.IsDescending {
+			orderDirection = "DESC"
+		}
+		clauses = append(clauses, sortDetails.Column+" "+orderDirection)
+	}
+
+	query += " ORDER BY " + strings.Join(clauses, ",")
+	return query, nil
 }
 
 func (m *racesRepo) scanRaces(
