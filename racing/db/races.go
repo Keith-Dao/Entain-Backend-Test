@@ -98,7 +98,7 @@ func (r *racesRepo) applyFilter(query string, filter *racing.ListRacesRequestFil
 }
 
 // Applies the order by statement to the query.
-// If not columns are provided in sort, sorting is defaulted to advertised_start_time in ascending order.
+// If no columns are provided in sort, sorting is defaults to advertised_start_time in ascending order.
 func (r *racesRepo) applyOrderBy(query string, sort []*racing.ListRacesRequestSort) (string, error) {
 	if len(sort) == 0 {
 		defaultSort := racing.ListRacesRequestSort{
