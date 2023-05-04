@@ -112,14 +112,12 @@ func (r *racesRepo) applyOrderBy(query string, sort []*racing.ListRacesRequestSo
 	isValidColumn := regexp.MustCompile("^[A-Za-z0-9_]+$")
 	for _, sortDetails := range sort {
 		if len(sortDetails.Column) == 0 {
-			err := errors.New("A sort request object is missing the column value.")
-			return query, err
+			return query, errors.New("A sort request object is missing the column value.")
 		}
 
 		// Check column is valid (prevent SQL injection)
 		if !isValidColumn.MatchString(sortDetails.Column) {
-			err := fmt.Errorf("%q is not a valid column name", sortDetails.Column)
-			return query, err
+			return query, fmt.Errorf("%q is not a valid column name", sortDetails.Column)
 		}
 
 		// Build order clause
