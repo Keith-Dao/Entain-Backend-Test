@@ -21,6 +21,9 @@ type RacesRepo interface {
 
 	// List will return a list of races.
 	List(in *racing.ListRacesRequest) ([]*racing.Race, error)
+
+	// Get will return a race with the given id if it exists.
+	Get(id int64) (*racing.Race, error)
 }
 
 type racesRepo struct {
@@ -66,6 +69,31 @@ func (r *racesRepo) List(in *racing.ListRacesRequest) ([]*racing.Race, error) {
 	}
 
 	return r.scanRaces(rows)
+}
+
+// Get will return a race with the given id if it exists.
+func (r *racesRepo) Get(id int64) (*racing.Race, error) {
+	var (
+		query string
+		args  []interface{}
+	)
+
+	query = getRaceQueries()[racesList]
+	query, args = r.applyIdFilter(query, id)
+	rows, err := r.db.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	races, err := r.scanRaces(rows)
+	if err != nil {
+		return nil, err
+	}
+	if len(races) == 0 {
+		return nil, fmt.Errorf(`A race with id "%d" does not exist.`, id)
+	}
+
+	return races[0], nil
 }
 
 func (r *racesRepo) applyFilter(query string, filter *racing.ListRacesRequestFilter) (string, []interface{}) {
@@ -117,7 +145,7 @@ func (r *racesRepo) applyOrderBy(query string, sort []*racing.ListRacesRequestSo
 
 		// Check column is valid (prevent SQL injection)
 		if !isValidColumn.MatchString(sortDetails.Column) {
-			return query, fmt.Errorf("%q is not a valid column name", sortDetails.Column)
+			return query, fmt.Errorf("%q is not a valid column name.", sortDetails.Column)
 		}
 
 		// Build order clause
@@ -130,6 +158,11 @@ func (r *racesRepo) applyOrderBy(query string, sort []*racing.ListRacesRequestSo
 
 	query += " ORDER BY " + strings.Join(clauses, ",")
 	return query, nil
+}
+
+// applyIdFilter applies the id filter to the query.
+func (r *racesRepo) applyIdFilter(query string, id int64) (string, []interface{}) {
+	return query + "WHERE id = ?", []interface{}{id}
 }
 
 func (m *racesRepo) scanRaces(

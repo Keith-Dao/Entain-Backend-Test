@@ -11,6 +11,9 @@ service Racing {
   rpc ListRaces(ListRacesRequest) returns (ListRacesResponse) {
     option (google.api.http) = { post: "/v1/list-races", body: "*" };
   }
+  rpc GetRace(GetRaceRequest) returns (Race) {
+    option (google.api.http) = { get: "/v1/race/{id=*}"};
+  }
 }
 
 /* Requests/Responses */
@@ -32,9 +35,15 @@ message ListRacesRequestFilter {
   bool only_show_visible = 2;
 }
 
+// Sort for listing races.
 message ListRacesRequestSort {
   string column = 1;
   bool is_descending = 2;
+}
+
+// Request for GetRace call.
+message GetRaceRequest {
+  int64 id = 1;
 }
 
 /* Resources */
