@@ -58,7 +58,8 @@ The columns to sort the queries and whether the respective column should be in d
       "name": "Connecticut griffins",
       "number": "12",
       "visible": true,
-      "advertisedStartTime": "2021-03-02T19:16:58Z"
+      "advertisedStartTime": "2021-03-02T19:16:58Z",
+      "status": "CLOSED"
     }
   ]
 }
@@ -77,12 +78,15 @@ List of all races that match the conditions provided by the filter.
 &emsp; The name of the race.
 
 &emsp; **number** - int  
-&emsp; The race's number. <!-- This might not be right. -->
+&emsp; The race's number.
 
 &emsp; **visible** - bool  
 &emsp; The race's visibility.
 
 &emsp; **advertisedStartTime** - timestamp  
 &emsp; The race's advertised start time.
+
+&emsp; **status** - string  
+&emsp; The race's status, which will either be `OPEN` if the `advertisedStartTime` is after the current time, other it will be `CLOSED`.
 
 ---
