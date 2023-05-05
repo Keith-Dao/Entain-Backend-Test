@@ -2,7 +2,12 @@ api/api
 racing/racing
 .DS_STORE
 *.out
+
+# Workspace items
 .idea
 .vscode
 go.work*
+
+# Database files
+racing/db/*.db
 
