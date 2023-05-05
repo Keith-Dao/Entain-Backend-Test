@@ -4,9 +4,11 @@
 
 Lists all the races that match the filters provided in request body.
 
+### Request
+
 `POST /v1/list-races`
 
-### Request body:
+#### Body
 
 ```json
 {
@@ -90,3 +92,51 @@ List of all races that match the conditions provided by the filter.
 &emsp; The race's status, which will either be `OPEN` if the `advertisedStartTime` is after the current time, other it will be `CLOSED`.
 
 ---
+
+## Get race
+
+Gets the race with a given id, if it exists.
+
+### Request
+
+`GET /v1/race/{id}`
+
+**id** - int
+The race id.
+
+---
+
+### Response
+
+```json
+{
+  "id": "2",
+  "meetingId": "1",
+  "name": "Connecticut griffins",
+  "number": "12",
+  "visible": true,
+  "advertisedStartTime": "2021-03-02T19:16:58Z",
+  "status": "CLOSED"
+}
+```
+
+**id** - int  
+The race id.
+
+**meetingId** - int  
+The race's meeting id.
+
+**name** - string  
+The name of the race.
+
+**number** - int  
+The race's number.
+
+**visible** - bool  
+The race's visibility.
+
+**advertisedStartTime** - timestamp  
+The race's advertised start time.
+
+**status** - string  
+The race's status, which will either be `OPEN` if the `advertisedStartTime` is after the current time, other it will be `CLOSED`.
