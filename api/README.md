@@ -77,7 +77,7 @@ List of all races that match the conditions provided by the filter.
 &emsp; The name of the race.
 
 &emsp; **number** - int  
-&emsp; The race's number. <!-- This might not be right. -->
+&emsp; The race's number.
 
 &emsp; **visible** - bool  
 &emsp; The race's visibility.
